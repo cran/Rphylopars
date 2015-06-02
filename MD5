@@ -1,8 +1,8 @@
-8d22a48410fca010914d3ae31eb05100 *DESCRIPTION
+ed219912c3d38368a499df9ffc61c09e *DESCRIPTION
 b71655a84da364453c21d851e8f7e4b9 *NAMESPACE
 821549cbd8449f195071bd94c951c74d *R/RcppExports.R
 d07d3d95406e1953f9df0c68f2f51f1a *R/phylopars_main.R
-754912f577324a4c1b4b8ccbbc567338 *man/Rphylopars-package.Rd
+2aa74ee5cd203ba36a45d0acf059a1a2 *man/Rphylopars-package.Rd
 22c9803f88bd5aab795ba0054484d79f *man/anova.phylopars.lm.Rd
 2086dd4058110692e6211a97a8ebac8f *man/logLik.phylopars.Rd
 fac4d7a5f51b9d6d25bcfc33f97489d2 *man/logLik.phylopars.lm.Rd
@@ -22,5 +22,5 @@ a13fa693f3657243bc29e2c6fba72263 *man/summary.phylopars.Rd
 31cd638c56632dc479bd0d605fb28a09 *man/write.phylopars.Rd
 bcc42aaeb0a69ec1b279b42021751d66 *src/Makevars
 0ddd28eb5b06d3d3c650d26e07b49a77 *src/Makevars.win
-ca56be2698ff49ceedb3ca0ce0d888fb *src/RcppExports.cpp
-57702553b90995d6baf50b425860b451 *src/phylopars_rcpp.cpp
+403c2ac7d4ddffd477953ecba6943a8f *src/RcppExports.cpp
+92d1540f52be85ff25b8d731c14a7bc5 *src/phylopars_rcpp.cpp
