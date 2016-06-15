@@ -13,7 +13,7 @@ phenocov_start, model_par_start, phylocov_fixed, phenocov_fixed, model_par_fixed
 skip_optim = FALSE, skip_EM = FALSE, EM_Fels_limit = 1000, repeat_optim_limit = 1,
 EM_missing_limit = 50, repeat_optim_tol = 0.01, model_par_evals = 10, max_delta = 10000,
 EM_verbose = FALSE, optim_verbose = FALSE, npd = FALSE,
-nested_optim = FALSE, usezscores = TRUE)
+nested_optim = FALSE, usezscores = TRUE, phenocov_list = list())
 }
 \arguments{
   \item{trait_data}{
@@ -97,12 +97,29 @@ Only relevant if fitting a univariate alternative evolutionary model. Tries mult
   \item{usezscores}{
 Whether or not ot use centered and standardized data during numerical optimization (recommended).
 }
+  \item{phenocov_list}{
+An optional named list of species-specific within-species covariance matrices to be held fixed, as in Ives et al (2007). This option forces pheno_error and pheno_correlated to be FALSE, and uses mean species values instead of raw data. Raw variance should be divided by the number of observations per species (i.e., squared standard errors). See Ives et al (2007) for more details.
+}
 }
 \value{
-An object of class \code{phylopars}.
+An object of class \code{phylopars}. For models with phenotypic (within-species) covariance, the estimated percentage of variance explained by the phylogeny is provided as 100*(1 - phenotypic_variance/raw_variance), where raw_variance is the variance of all observations for a given trait across species (\code{var(PPE$trait_data[,2:ncol(PPE$trait_data)],na.rm=TRUE)}).
+\item{logLik }{The log-likelihood of the model}
+\item{pars }{A list composed of phylogenetic trait covariance and phenotypic (within-species) trait covariance, if estimated}
+\item{model }{The model of evolution (e.g., BM, OU, lambda, etc.), and any additional evolutionary model parameters estimated. For OU models, stationary covariance is calculated from both phylogenetic covariance (Sigma) and alpha (see Supplement 1 of Clavel et al. 2015).}
+\item{mu }{The estimate ancestral state at the root of the tree.}
+\item{npars }{The total number of parameters estimated by optimization (used for AIC and BIC).}
+\item{anc_recon }{Reconstructed ancestral states and species means. Row names correspond to species names (for the first 1:nspecies rows), and the remaining row names correspond to node numbers on a tree with edges in postorder: \code{reorder(tree,"postorder"). Or, if node labels were included on the original tree, row names correspond to node labels.}}
+\item{anc_var }{Variance of reconstructed ancestral estimates and imputed species means.}
+\item{anc_cov }{Covariance of estimates among variables.}
+\item{tree }{The phylogenetic tree supplied to \code{phylopars}}
+\item{trait_data }{The trait data supplied to \code{phylopars}}
+\item{REML }{\code{TRUE} if REML, FALSE if ML.}
 }
 \references{
 Bruggeman J, Heringa J and Brandt BW. (2009) PhyloPars: estimation of missing parameter values using phylogeny. \emph{Nucleic Acids Research} 37: W179-W184.
+
+Clavel, J., Escarguel, G. & Merceron, G. (2015) mvmorph: an r package for fitting multivariate
+261 evolutionary models to morphometric data. Methods in Ecology and Evolution, 6, 131-1319.
 
 Felsenstein, J. (2008) Comparative methods with sampling error and within-species variation: contrasts revisited and revised. American Naturalist, 171, 713-725.
 

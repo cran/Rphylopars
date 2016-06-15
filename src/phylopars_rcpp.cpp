@@ -4,6 +4,118 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
+List C_anc_recon(arma::mat Y,arma::vec anc,arma::vec des,arma::vec edge_vec,int nedge,int nvar,int nspecies)
+{
+  arma::vec p = arma::zeros(nedge+1);
+  arma::mat Yhat = arma::zeros(nedge+1,nvar);
+
+  int i=0;
+  int anc_edge=0;
+  int des_edge=0;
+  double pA=0;
+  double len=0;
+  for(i=0;i<nedge;i++)
+  {
+    anc_edge = anc(i)-1;
+    des_edge = des(i)-1;
+    len = edge_vec(i);
+    
+    if(des_edge<nspecies)
+    {
+      p(des_edge) = 1/len;
+      Yhat.row(des_edge) = Y.row(des_edge);
+    } else
+    {
+      pA = p(des_edge);
+      Yhat.row(des_edge) = Yhat.row(des_edge)/pA;
+      p(des_edge) = pA/(1+len*pA);
+    }
+    p(anc_edge) += p(des_edge);
+    Yhat.row(anc_edge) += Yhat.row(des_edge)*p(des_edge);
+  }
+  Yhat.row(anc_edge) = Yhat.row(anc_edge)/p(anc_edge);
+  
+  for(i=nedge-1;i>=0;i--)
+  {
+    anc_edge = anc(i)-1;
+    des_edge = des(i)-1;
+    len = edge_vec(i);
+    
+    if(des_edge>=nspecies)
+    {
+      Yhat.row(des_edge) = Yhat.row(des_edge)*p(des_edge)*len + Yhat.row(anc_edge) - Yhat.row(anc_edge)*p(des_edge)*len;
+      p(des_edge) = p(des_edge)/(1-len*p(des_edge)) + (p(anc_edge)-p(des_edge))/(1+len*(p(anc_edge)-p(des_edge)));
+    } else
+    {
+      p(des_edge) = 0;
+    }
+  }
+  return List::create(_["Yhat"] = Yhat,_["p"] = p);
+}
+
+
+// [[Rcpp::export]]
+List C_anc_recon_rates(arma::mat Y,arma::vec anc,arma::vec des,arma::vec edge_vec,int nedge,int nvar,int nspecies,int REML)
+{
+  arma::vec p = arma::zeros(nedge+1);
+  arma::mat Yhat = arma::zeros(nedge+1,nvar);
+  arma::mat XY = arma::zeros(nedge+1,nvar);
+  arma::mat YY = arma::zeros(nvar*(nedge+1),nvar);
+  
+  int i=0;
+  int anc_edge=0;
+  int des_edge=0;
+  double pA=0;
+  double len=0;
+  for(i=0;i<nedge;i++)
+  {
+    anc_edge = anc(i)-1;
+    des_edge = des(i)-1;
+    len = edge_vec(i);
+    
+    if(des_edge<nspecies)
+    {
+      p(des_edge) = 1/len;
+      Yhat.row(des_edge) = Y.row(des_edge);
+      XY.row(des_edge) = Y.row(des_edge)/len;
+      YY.rows(des_edge*nvar,nvar+(des_edge*nvar)-1) = trans(Y.row(des_edge))*Y.row(des_edge)/len;
+    } else
+    {
+      pA = p(des_edge);
+      Yhat.row(des_edge) = Yhat.row(des_edge)/pA;
+      YY.rows(des_edge*nvar,nvar+(des_edge*nvar)-1) = YY.rows(des_edge*nvar,nvar+(des_edge*nvar)-1) -
+        trans(XY.row(des_edge))*XY.row(des_edge)*len/(1+len*pA);
+      XY.row(des_edge) = XY.row(des_edge)/(1+len*pA);
+      p(des_edge) = pA/(1+len*pA);
+    }
+    p(anc_edge) += p(des_edge);
+    Yhat.row(anc_edge) += Yhat.row(des_edge)*p(des_edge);
+    XY.row(anc_edge) += XY.row(des_edge);
+    YY.rows(anc_edge*nvar,nvar+(anc_edge*nvar)-1) += YY.rows(des_edge*nvar,nvar+(des_edge*nvar)-1);
+  }
+  Yhat.row(anc_edge) = Yhat.row(anc_edge)/p(anc_edge);
+  arma::mat Sigma = (YY.rows(anc_edge*nvar,nvar+(anc_edge*nvar)-1) - 
+    2*(trans(Yhat.row(anc_edge))*XY.row(anc_edge)) + trans(Yhat.row(anc_edge))*Yhat.row(anc_edge)*p(anc_edge))/(nspecies-REML);
+  for(i=nedge-1;i>=0;i--)
+  {
+    anc_edge = anc(i)-1;
+    des_edge = des(i)-1;
+    len = edge_vec(i);
+    
+    if(des_edge>=nspecies)
+    {
+      Yhat.row(des_edge) = Yhat.row(des_edge)*p(des_edge)*len + Yhat.row(anc_edge) - Yhat.row(anc_edge)*p(des_edge)*len;
+      p(des_edge) = p(des_edge)/(1-len*p(des_edge)) + (p(anc_edge)-p(des_edge))/(1+len*(p(anc_edge)-p(des_edge)));
+    } else
+    {
+      p(des_edge) = 0;
+    }
+  }
+  
+  return List::create(_["Yhat"] = Yhat,_["p"] = p,_["Sigma"] = Sigma);
+}
+
+// [[Rcpp::export]]
 arma::mat try_inv(arma::mat M,int nvar)
 {
   arma::mat Minv;
@@ -226,7 +338,7 @@ List calc_OU_len(arma::vec heights,arma::mat edge_mat,arma::vec des_order,int ne
 }
 
 // [[Rcpp::export]]
-List tp(arma::mat L,arma::mat R,arma::mat Rmat,int mL,int mR,int pheno_error,arma::vec edge_vec,arma::vec edge_ind,arma::vec ind_edge,arma::vec parent_edges,arma::vec pars,unsigned int nvar,int phylocov_diag,int nind,int nob,int nspecies,int nedge,arma::vec anc,arma::vec des,int REML,List species_subset,List un_species_subset,List subset_list,List ind_list,arma::vec tip_combn,LogicalVector is_edge_ind,arma::mat fixed_mu,List OU_len,arma::mat phylocov_fixed,arma::mat phenocov_fixed,int is_phylocov_fixed=0,int is_phenocov_fixed=0,int OU_par=0,int ret_level=1,int use_LL=0)
+List tp(arma::mat L,arma::mat R,arma::mat Rmat,int mL,int mR,int pheno_error,arma::vec edge_vec,arma::vec edge_ind,arma::vec ind_edge,arma::vec parent_edges,arma::vec pars,unsigned int nvar,int phylocov_diag,int nind,int nob,int nspecies,int nedge,arma::vec anc,arma::vec des,int REML,List species_subset,List un_species_subset,List subset_list,List ind_list,arma::vec tip_combn,LogicalVector is_edge_ind,arma::mat fixed_mu,List OU_len,arma::mat phylocov_fixed,arma::mat phenocov_fixed,List phenocov_list,int is_phylocov_fixed=0,int is_phenocov_fixed=0,int OU_par=0,int ret_level=1,int use_LL=0,int is_phenocov_list=0)
 {
   /*
   subset_list is a list of unique matrices to invert once
@@ -324,6 +436,7 @@ List tp(arma::mat L,arma::mat R,arma::mat Rmat,int mL,int mR,int pheno_error,arm
         if(OU_par==1)
         {
           phenocov = Rcpp::as<arma::mat>(OU_len(edge_ind(i)));
+          if(is_phenocov_list>0) phenocov.submat(Ka,Ka) += Rcpp::as<arma::mat>(phenocov_list(i)).submat(Ka,Ka);
           Bainv = try_inv(phenocov.submat(Ka,Ka),Ka.size());
           if(Bainv(0,0)==1.0123456789)
           {
@@ -333,7 +446,11 @@ List tp(arma::mat L,arma::mat R,arma::mat Rmat,int mL,int mR,int pheno_error,arm
         {
           len = edge_vec(edge_ind(i));
           phenocov = phylocov*len;
-          Bainv = Bainv/len;
+          if(is_phenocov_list>0)
+          {
+            phenocov.submat(Ka,Ka) += Rcpp::as<arma::mat>(phenocov_list(i)).submat(Ka,Ka);
+            Bainv = try_inv(phenocov.submat(Ka,Ka),Ka.size());
+          } else Bainv = Bainv/len;
         }
       }
       arma::mat R_i = R.rows(Ia);
@@ -505,7 +622,7 @@ List tp(arma::mat L,arma::mat R,arma::mat Rmat,int mL,int mR,int pheno_error,arm
     len = edge_vec(i);
     des_edge = i + nind;
     anc_edge = parent_edges(i) + nind;
-    if((pheno_error==0) && is_edge_ind(i))
+    if((pheno_error==0) && is_edge_ind(i) && (is_phenocov_list==0))
     {
       /*
       XX[[des_edge]][-Ka,-Ka] <- other_p[-Ka,-Ka]
