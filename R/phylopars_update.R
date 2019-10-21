@@ -46,8 +46,8 @@ anc.recon <- function(trait_data, tree, vars = FALSE, CI = FALSE)
     colnames(var) <- colnames(Yhat)
     if(CI)
     {
-      lower <- Yhat + qnorm(.975)*var
-      upper <- Yhat - qnorm(.975)*var
+      lower <- Yhat + qnorm(.975)*sqrt(var)
+      upper <- Yhat - qnorm(.975)*sqrt(var)
       rownames(lower) <- rownames(upper) <- tree$node.label
       colnames(lower) <- colnames(upper) <- colnames(Yhat)
     }
@@ -122,7 +122,7 @@ print.SSC <- function(x, ...)
 }
 
 
-phylopars <- function(trait_data,tree,model="BM",pheno_error,phylo_correlated=TRUE,pheno_correlated=TRUE,REML=TRUE,full_alpha=TRUE,phylocov_start,phenocov_start,model_par_start,phylocov_fixed,phenocov_fixed,model_par_fixed,skip_optim=FALSE,skip_EM=FALSE,EM_Fels_limit=1e3,repeat_optim_limit=1,EM_missing_limit=50,repeat_optim_tol = 1e-2,model_par_evals=10,max_delta=1e4,EM_verbose=FALSE,optim_verbose=FALSE,npd=FALSE,nested_optim=FALSE,usezscores=TRUE,phenocov_list=list())
+phylopars <- function(trait_data,tree,model="BM",pheno_error,phylo_correlated=TRUE,pheno_correlated=TRUE,REML=TRUE,full_alpha=TRUE,phylocov_start,phenocov_start,model_par_start,phylocov_fixed,phenocov_fixed,model_par_fixed,skip_optim=FALSE,skip_EM=FALSE,EM_Fels_limit=1e3,repeat_optim_limit=1,EM_missing_limit=50,repeat_optim_tol = 1e-2,model_par_evals=10,max_delta=1e4,EM_verbose=FALSE,optim_verbose=FALSE,npd=FALSE,nested_optim=FALSE,usezscores=TRUE,phenocov_list=list(),ret_args=FALSE,ret_level=1)
 {
   tree <- tree[c("edge","tip.label","edge.length","Nnode")]
   class(tree) <- "phylo"
@@ -366,6 +366,17 @@ phylopars <- function(trait_data,tree,model="BM",pheno_error,phylo_correlated=TR
   tip_combn_complete <- rep(0,nind)
   
   em_tol <- 1e-3
+  
+  if(ret_args)
+  {
+    return(list(L=X, R=R, Rmat = as.matrix(Rmat),mL=ncol(X), mR=1, pheno_error=pheno_error, edge_vec=edge_vec, 
+                edge_ind=edge_ind,ind_edge=ind_edge, parent_edges = parent_edges,pars=double(), nvar=nvar, 
+                phylocov_diag=as.integer(!phylo_correlated), nind=nind, nob=nob, nspecies=nspecies, nedge=nedge, anc=anc, des=des, REML=as.integer(REML), 
+                species_subset=species_subset, un_species_subset = un_species_subset,subset_list=subset_list,
+                ind_list=ind_list, tip_combn=tip_combn,is_edge_ind=is_edge_ind,fixed_mu=matrix(0),ret_level=ret_level,
+                is_phylocov_fixed=as.integer(!is.na(phylocov_fixed)[[1]]),phylocov_fixed=phylocov_fixed,is_phenocov_list=length(phenocov_list),phenocov_list=phenocov_list,
+                is_phenocov_fixed=as.integer(!is.na(phenocov_fixed)[[1]]),phenocov_fixed=phenocov_fixed,OU_len=list()))
+  }
   
   # function for estimating phylogenetic/phenotypic covariance using EM and numerical optimization
   estim_pars <- function(edge_vec,do_optim=FALSE,phylocov=diag(nvar),phenocov=diag(nvar),mu=matrix(0))
@@ -1391,15 +1402,19 @@ summary.phylopars <- function(object, ...)
   } else if(PPE$model=="BM") cat("Brownian motion model") else if(PPE$model=="white" | PPE$model=="star") cat("Star phylogeny model")
   cat("\n")
   
-  ret <- matrix(0,nrow(PPE$pars[[1]]),4,dimnames = list(colnames(PPE$pars[[1]]),c("phylogenetic mean","phylogenetic sd","phenotypic sd",
-                                                                                  "% variance explained by phylogeny")))
+  ncol <- ifelse(length(PPE$pars)>1,4,2)
+  ret <- matrix(0,nrow(PPE$pars[[1]]),ncol,dimnames = list(colnames(PPE$pars[[1]]),
+                                                           c("phylogenetic mean","phylogenetic sd","phenotypic sd",
+                                                             "% variance explained by phylogeny")[1:ncol]))
   ret[,1] <- PPE$mu
   ret[,2] <- round(sqrt(diag(PPE$pars[[1]])),4)
-  ret[,3] <- round(sqrt(diag(PPE$pars[[2]])),4)
-  nvar <- ncol(PPE$pars[[1]])
-  percent_var <- (1-diag(PPE$pars[[2]])/apply(PPE$trait_data[,1:nvar+1],2,function(X) var(X,na.rm=TRUE)))*100
-  names(percent_var) <- colnames(PPE$pars[[1]])
-  ret[,4] <- round(percent_var,2)
+  if(length(PPE$pars)>1) {
+    ret[,3] <- round(sqrt(diag(PPE$pars[[2]])),4)
+    nvar <- ncol(PPE$pars[[1]])
+    percent_var <- (1-diag(PPE$pars[[2]])/apply(PPE$trait_data[,1:nvar+1],2,function(X) var(X,na.rm=TRUE)))*100
+    names(percent_var) <- colnames(PPE$pars[[1]])
+    ret[,4] <- round(percent_var,2)
+  }
   ret
 }
 
