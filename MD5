@@ -1,10 +1,10 @@
-81475c136a6dd4a3a90a990e6805e360 *DESCRIPTION
-2a74bda301d98ac3316b9ec0cfeec91f *NAMESPACE
+63d1b976fe4df6d4d4bc0eb10c507ec2 *DESCRIPTION
+3318fc4bd09df4c8cb02b6f144dd6668 *NAMESPACE
 6c0f670b1868e0114e55d47608054dd5 *R/RcppExports.R
 8654a2e91dc54565e76aa5208b4c1b44 *R/phylopars_main.R
 cc32278566aa083b6cce1bc4f52a1eb6 *R/phylopars_update.R
 932cb9cad8324295f5add67c91bd8129 *README.md
-ff4554daa7044cd9bbc72ba066114bef *man/Rphylopars-package.Rd
+11d67b790d7d956eeaba224caf37e2ad *man/Rphylopars-package.Rd
 dfac8c32261366258413150043c2fd02 *man/anc.recon.Rd
 22c9803f88bd5aab795ba0054484d79f *man/anova.phylopars.lm.Rd
 faa6f72ce6e3ae540e342ea93fdacead *man/fast.SSC.Rd

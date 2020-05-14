@@ -13,8 +13,8 @@ Visit the \pkg{Rphylopars} wiki for tutorials at \url{http://github.com/ericgool
 \tabular{ll}{
 Package: \tab Rphylopars\cr
 Type: \tab Package\cr
-Version: \tab 0.2.12\cr
-Date: \tab 2019-12-11\cr
+Version: \tab 0.3.0\cr
+Date: \tab 2020-05-13\cr
 License: \tab GPL (>= 2)\cr
 }
 }
