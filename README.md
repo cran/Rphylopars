@@ -4,10 +4,12 @@ Rphylopars is an R package for conducting multivariate phylogenetic comparative 
 For download information and tutorials, visit the [Rphylopars wiki](https://github.com/ericgoolsby/Rphylopars/wiki).
 
 ## Current versions available
-### CRAN: 0.2.11
+### CRAN: 0.3.2
 ### GitHub:
-* master branch - 0.2.11
-* devel branch - 0.2.11
+* master branch - 0.3.2
+* devel branch - 0.3.2
 
 ## Version notes
-* Version 0.2.11 - fixed confidence intervals (previously too large) and installation issues
+* Version 0.3.1 and 0.3.2 - Removed broken links from fast.SSC.Rd and Rphylopars-package.Rd help files (resolves CRAN notes)
+* Version 0.3.0 - R 4.0 compatibility
+* Version 0.2.11 - Fixed confidence intervals (previously too large) and installation issues
