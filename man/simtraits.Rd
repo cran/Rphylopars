@@ -4,7 +4,7 @@
 Simulate traits for phylopars estimation
 }
 \description{
-Simulates traits for code{phylopars} estimation.
+Simulates traits for \code{phylopars} estimation.
 }
 \usage{
 simtraits(ntaxa = 15, ntraits = 4, nreps = 1, nmissing = 0, tree, v, anc, 

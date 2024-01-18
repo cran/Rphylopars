@@ -13,5 +13,6 @@ Generic S3 method for objects returned by the function \code{fast.SSC}
 Object returned by \code{fast.SSC}
 }
   \item{\dots}{
+  Further arguments passed to or from other methods.
 }
 }

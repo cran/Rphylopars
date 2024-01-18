@@ -14,5 +14,6 @@ Summarizes phylopars.lm
 Fitted phylopars.lm object
 }
   \item{\dots}{
+  Further arguments passed to or from other methods.
 }
 }

@@ -4,11 +4,12 @@ Rphylopars is an R package for conducting multivariate phylogenetic comparative 
 For download information and tutorials, visit the [Rphylopars wiki](https://github.com/ericgoolsby/Rphylopars/wiki).
 
 ## Current versions available
-### CRAN: 0.3.2 (0.3.9 submission pending)
-### GitHub master branch - 0.3.9
-### GitHub devel branch - 0.3.9
+### CRAN: 0.3.9 (0.3.10 submission pending)
+### GitHub master branch - 0.3.10
+### GitHub devel branch - 0.3.10
 
 ## Version notes
+* Version 0.3.10 - Removed arma::set_cerr_stream() to address deprecation warning.
 * Version 0.3.9 - Added `get_cov_CIs` as option to `phylopars` to estimate 95% confidence intervals for trait covariance parameters. Clean up `write.phylopars()` function Also removed dependency on geiger, which is set to be archived on CRAN.
 * Version 0.3.8 - Fixes `sim.traits()` error which previously set root value to 1.
 * Version 0.3.7 - Converts `trait_data` to `data.frame` to prevent errors from tibbles

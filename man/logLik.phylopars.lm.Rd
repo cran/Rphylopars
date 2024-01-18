@@ -13,5 +13,6 @@ Generic S3 method for phylopars
 Fitted phylopars.lm object
 }
   \item{\dots}{
+  Further arguments passed to or from other methods.
 }
 }
